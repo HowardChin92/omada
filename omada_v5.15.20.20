@@ -52,9 +52,17 @@ function update_script() {
     msg_ok "Azul Zulu Java 21 already installed"
   fi
 
-  msg_info "Updating Omada Controller"  
-OMADA_URL=$(curl -fsSL "https://support.omadanetworks.com/en/download/software/omada-controller/" |
-    grep -o 'https://static.tp-link.com/upload/software/2025/202504/20250425/omada_v5.15.20.20_linux_x64_20250416110555.deb' |
+msg_info "Installing libssl (if needed)"
+if ! dpkg -l | grep -q 'libssl1.1'; then
+  curl -fsSL "https://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.1_1.1.1w-0+deb11u2_amd64.deb" -o "/tmp/libssl.deb"
+  curl -fsSL "https://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.1_1.1.1w-0+deb11u3_amd64.deb" -o "/tmp/libssl.deb"
+  $STD dpkg -i /tmp/libssl.deb
+  rm -f /tmp/libssl.deb
+  msg_ok "Installed libssl1.1"
+  fi
+  msg_info "Updating Omada Controller"
+  OMADA_URL=$(curl -fsSL "https://support.omadanetworks.com/en/download/software/omada-controller/" |
+    grep -o 'https://static\.tp-link\.com/upload/software/[^"]*linux_x64[^"]*\.deb' |
     head -n1)
   OMADA_PKG=$(basename "$OMADA_URL")
   if [ -z "$OMADA_PKG" ]; then
